@@ -1,0 +1,52 @@
+#! /bin/bash
+
+# Variables ajustables :
+BACKUP_DIR=                                             # L'espace à sauvagarder
+BACKUP_STOCK=                                           # Le stockage des backups
+DATE=`date '+%d-%m-%y_%HH%M'`                           # Date à insérer dans le nom
+LOG_FILE=/tmp/backup_`date '+%d-%m-%y_%HH%M'`.log       # Le fichier de log
+ 
+# Fonction de backup complet
+if [ date+%A = "vendredi" ] 
+then
+save_full ()
+{
+echo -e "\nSAUVEGARDE COMPLETE" >> $LOG_FILE
+NBRE_FILES=`find $BACKUP_DIR -type f 2>/dev/null | wc -l`
+if [[ $NBRE_FILES == 0 ]]
+        then
+        echo -e "\nIl n'y a aucun fichier dans $BACKUP_DIR, donc INUTILE DE SAUVEGARDER\n" >> $LOG_FILE
+        RESULT=0
+        notif
+        exit 0
+        else
+        tar -czf $BACKUP_STOCK/SAVE_FULL_$DATE.tgz $BACKUP_DIR 2>/dev/null
+        RESULT=$?
+        sleep 3
+        echo -e "\nArborescence de l'espace de backup\n" >> $LOG_FILE && tree -L 1 $BACKUP_STOCK >> $LOG_FILE
+        echo -e "\nTaille de l'espace disque des backup\n" >> $LOG_FILE && du -hs $BACKUP_STOCK/* >> $LOG_FILE
+        fi
+}
+fi 
+# Fonction de backup incrémental
+if [ date+%A != "vendredi" ]
+then
+save_inc ()
+{
+echo -e "\nSAUVEGARDE INCREMENTALE" >> $LOG_FILE
+NBRE_FILES=`find $BACKUP_DIR -type f -mtime -1 2>/dev/null | wc -l`
+if [[ $NBRE_FILES == 0 ]]
+        then
+        echo -e "\nIl n'y a pas eut de modifications dans les dernières 24 heures, donc INUTILE DE SAUVEGARDER\n" >> $LOG_FILE
+        RESULT=0
+        notif
+        exit 0
+        else
+        tar -czf $BACKUP_STOCK/SAVE_INC_$DATE.tgz `find $BACKUP_DIR -type f -mtime -1` 2>/dev/null
+        sleep 3
+        RESULT=$?
+        echo -e "\nArborescence de l'espace de backup\n" >> $LOG_FILE && tree -L 1 $BACKUP_STOCK >> $LOG_FILE
+        echo -e "\nTaille de l'espace disque des backup\n" >> $LOG_FILE && du -hs $BACKUP_STOCK/* >> $LOG_FILE
+        fi
+}
+fi

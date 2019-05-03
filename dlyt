@@ -1,0 +1,6 @@
+#! /bin/bash
+
+echo "url svp"
+read URL
+
+youtube-dl $URL

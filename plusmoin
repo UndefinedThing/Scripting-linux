@@ -1,0 +1,28 @@
+#! /bin/bash
+
+nombre=2000000
+nbtentative=0
+alea=$RANDOM
+
+trap "echo  NON tu  continue a jouer connard" 1 2 3 15
+
+while [ "$nombre" -ne $alea ];
+	do echo -n "Devinez? ";
+	read nombre
+
+if test $nombre -eq $nombre 2> /dev/null
+	then 
+		if [ "$nombre" -lt $alea ];then
+			echo "... c'est plus grand";
+		elif [ "$nombre" -gt $alea ];then
+			echo "... c'est plus petit";
+		fi
+else echo "Bakana suji de";
+fi
+nbtentative=$(($nbtentative+1))
+
+done
+
+echo "Bravo, tu a trouvé $nombre en $nbtentative coups"
+
+exit 0
